@@ -38,6 +38,12 @@ const { syncDataUpvotes, updateSyncDataUpvotes } = useGlobal()
 
 const { isFeatureEnabled } = useBetaFeatureToggle()
 
+const isSettingsSidebar = inject(IsSettingsSidebarInj, ref(false))
+
+// Hosted as a settings shell pane (not the new-connection modal): the shell's
+// gutter sets both edges, and its header band titles and describes the pane.
+const isShellPane = computed(() => isSettingsSidebar.value && !isModal)
+
 const { activeWorkspace } = storeToRefs(useWorkspace())
 
 const { isEEFeatureBlocked, blockAiIntegrations, showUpgradeToUseAiIntegrations, showEEFeatures } = useEeConfig()
@@ -336,8 +342,9 @@ watch(activeViewTab, (value) => {
             'h-full': !isModal,
           }"
         >
-          <div v-if="integrationListContainerWidth" class="px-6 pt-4">
+          <div v-if="integrationListContainerWidth" :class="isShellPane ? 'nc-shell-gutter pt-3' : 'px-6 pt-4'">
             <div
+              v-if="!isShellPane"
               class="flex justify-end flex-wrap gap-3 m-auto nc-content-max-w"
               :class="{
                 'items-start': showTitle,
@@ -368,13 +375,15 @@ watch(activeViewTab, (value) => {
                 Request Integration
               </NcButton>
             </div>
-            <!-- Search + filter — full width, outside the header row -->
-            <div class="flex items-center gap-2 nc-content-max-w m-auto !mt-4">
+            <!-- Search + filter — full width, outside the header row. In the shell it is
+                 the standard settings search, and Request Integration joins this row. -->
+            <div class="flex items-center gap-2" :class="isShellPane ? 'w-full' : 'nc-content-max-w m-auto !mt-4'">
               <a-input
                 ref="searchInputRef"
                 v-model:value="searchQuery"
                 type="text"
-                class="flex-1 nc-input-border-on-value nc-search-integration-input !rounded-lg !py-2 !h-9"
+                class="flex-1 nc-input-border-on-value nc-search-integration-input"
+                :class="isShellPane ? '!max-w-90 !h-8 !px-3 !py-1 !rounded-lg' : '!rounded-lg !py-2 !h-9'"
                 :placeholder="
                   showActiveConnections
                     ? $t('placeholder.searchConnectionsOrIntegrations')
@@ -387,7 +396,12 @@ watch(activeViewTab, (value) => {
                 </template>
               </a-input>
               <NcDropdown v-if="easterEggToggle && showFilter" v-model:visible="isOpenFilter" placement="bottomRight">
-                <NcButton size="medium" type="secondary" class="!px-1 !min-h-9 !min-w-9 !h-9 !w-9">
+                <NcButton
+                  size="medium"
+                  type="secondary"
+                  class="!px-1"
+                  :class="isShellPane ? '!min-h-8 !min-w-8 !h-8 !w-8' : '!min-h-9 !min-w-9 !h-9 !w-9'"
+                >
                   <div class="flex items-center gap-2">
                     <GeneralIcon icon="filter" />
                     <div
@@ -428,12 +442,23 @@ watch(activeViewTab, (value) => {
                   >
                 </template>
               </NcDropdown>
+
+              <NcButton
+                v-if="isShellPane && easterEggToggle"
+                type="ghost"
+                size="small"
+                class="!text-nc-content-brand ml-auto"
+                @click="requestIntegration.isOpen = true"
+              >
+                Request Integration
+              </NcButton>
             </div>
           </div>
 
           <div
             ref="integrationListRef"
-            class="flex-1 px-6 pb-8 flex flex-col nc-workspace-settings-integrations-list overflow-y-auto nc-scrollbar-thin"
+            class="flex-1 pb-8 flex flex-col nc-workspace-settings-integrations-list overflow-y-auto nc-scrollbar-thin"
+            :class="isShellPane ? 'nc-shell-gutter' : 'px-6'"
           >
             <div
               v-if="integrationListContainerWidth"
@@ -442,7 +467,7 @@ watch(activeViewTab, (value) => {
                 'flex-1': isEmptyList,
               }"
             >
-              <div class="flex flex-col space-y-6 w-full nc-content-max-w">
+              <div class="flex flex-col space-y-6 w-full" :class="{ 'nc-content-max-w': !isShellPane }">
                 <!-- Full-page skeleton during initial load (non-modal only) -->
                 <WorkspaceIntegrationsSkeleton v-if="showActiveConnections && !isModal && !isLoadedIntegrations" />
 
@@ -515,7 +540,7 @@ watch(activeViewTab, (value) => {
                                 </NcTooltip>
                                 <NcTooltip
                                   v-if="integration.subtitle"
-                                  class="subtitle text-xs text-nc-content-gray-subtle2 truncate"
+                                  class="subtitle mt-0.5 text-xs leading-4 min-h-8 text-nc-content-gray-subtle2 line-clamp-2 !whitespace-normal"
                                   show-on-truncate-only
                                   placement="bottom"
                                   :disabled="!integration?.isAvailable"
