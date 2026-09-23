@@ -482,7 +482,7 @@ const customRow = (record: Record<string, any>) => ({
           ref="connectionsSearchInputRef"
           v-model:value="searchQuery"
           type="text"
-          class="nc-search-integration-input !rounded-lg !py-2 !h-9 flex-1"
+          class="nc-search-integration-input nc-input-border-on-value flex-1 !min-w-60 !max-w-90 nc-input-sm"
           :placeholder="`${$t('general.search')} ${$t('general.connections').toLowerCase()}`"
           allow-clear
           @input="handleSearchConnection"
