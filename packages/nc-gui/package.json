@@ -219,7 +219,7 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "happy-dom": "^20.0.0",
+    "happy-dom": "^21.0.4",
     "nuxt": "^4.5.2",
     "nuxt-echarts": "^0.3.3",
     "prettier": "^2.8.8",
