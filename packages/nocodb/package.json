@@ -155,7 +155,7 @@
     "nocodb-sdk": "workspace:^",
     "node-machine-id": "^1.1.12",
     "node-sql-parser": "^5.3.6",
-    "nodemailer": "^9.0.1",
+    "nodemailer": "^10.1.4",
     "npm": "^11.3.0",
     "object-hash": "^3.0.0",
     "object-sizeof": "^2.6.5",
